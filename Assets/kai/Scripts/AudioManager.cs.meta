@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 6485d31d4dd9503418f2b362dac44b94
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - sound1: {fileID: 8300000, guid: bb8d613aa7eeb8643b3b99d2ef2c2fdf, type: 3}
+  - sound2: {fileID: 8300000, guid: 83b896d7df0c4ee4eafbf6f904149401, type: 3}
+  - sound3: {fileID: 8300000, guid: a424aef4c858d5247920bc61d5b4fabc, type: 3}
+  - sound4: {fileID: 8300000, guid: c54262ca057ad714b839102970d8cf51, type: 3}
+  - sound5: {fileID: 8300000, guid: 9987d720eade9c94a85a401ea6d1a00c, type: 3}
+  - sound6: {fileID: 8300000, guid: 13e7c3f62d342414f998fdee4409609f, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

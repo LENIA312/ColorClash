@@ -1,0 +1,107 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1045 &1
+EditorBuildSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Scenes:
+  - enabled: 1
+    path: Assets/@ColorClash/Scenes/FirstScene.unity
+    guid: 48b7e9e017468d74fa71c1f8f9c84793
+  - enabled: 1
+    path: Assets/@ColorClash/Scenes/level_0.unity
+    guid: 0bd03d976309da84d9f42a68bd6eafee
+  - enabled: 1
+    path: Assets/@ColorClash/Scenes/level_1.unity
+    guid: 463afda65f151f14abf0b5b1facc1c36
+  - enabled: 1
+    path: Assets/@ColorClash/Scenes/level_2.unity
+    guid: 93933afa257639146a19a880d10cf755
+  - enabled: 1
+    path: Assets/@ColorClash/Scenes/level_3.unity
+    guid: 2c61bbbde9c589b4bad4e67647fa3212
+  - enabled: 1
+    path: Assets/@ColorClash/Scenes/level_4.unity
+    guid: 41730803a3357dd429d15a2c5f3d7069
+  - enabled: 1
+    path: Assets/@ColorClash/Scenes/level_5.unity
+    guid: 8b399fc0ff1dfc64da43c8781b147064
+  - enabled: 1
+    path: Assets/@ColorClash/Scenes/level_6.unity
+    guid: 88285ba2bcdce1341867c9b191458fca
+  - enabled: 1
+    path: Assets/@ColorClash/Scenes/level_7.unity
+    guid: 80cabec4fb0247344a18a1086501ac30
+  - enabled: 1
+    path: Assets/@ColorClash/Scenes/level_8.unity
+    guid: 77621fde34f755945b6fa6364c990946
+  - enabled: 1
+    path: Assets/@ColorClash/Scenes/level_9.unity
+    guid: 5d1d94179d270344f9dfb1346e95f6f4
+  - enabled: 1
+    path: Assets/@ColorClash/Scenes/level_10.unity
+    guid: 7977782ec8b112e47942a6ba9d7f1264
+  - enabled: 1
+    path: Assets/@ColorClash/Scenes/level_11.unity
+    guid: aa3ae908fd48f354aa388842e90a8f39
+  - enabled: 1
+    path: Assets/@ColorClash/Scenes/level_12.unity
+    guid: a990993bd146385428ee3662aec06742
+  - enabled: 1
+    path: Assets/@ColorClash/Scenes/level_13.unity
+    guid: a9c8a237e4f5f714788ff3c3d1a7f09a
+  - enabled: 1
+    path: Assets/@ColorClash/Scenes/level_14.unity
+    guid: c77765ee2971ece4f8202badf8da695d
+  - enabled: 1
+    path: Assets/@ColorClash/Scenes/level_15.unity
+    guid: 3d8b599d48e041f48bb7da0e33906c7b
+  - enabled: 1
+    path: Assets/@ColorClash/Scenes/level_16.unity
+    guid: df8eeb345f1b3294b8c128e0b60fa313
+  - enabled: 1
+    path: Assets/@ColorClash/Scenes/level_17.unity
+    guid: fc3de3d453c956f47af5073dd6396f9e
+  - enabled: 1
+    path: Assets/@ColorClash/Scenes/level_18.unity
+    guid: 3782de4fe43b7ff41bca6365d2b345ff
+  - enabled: 1
+    path: Assets/@ColorClash/Scenes/level_19.unity
+    guid: 1049939a31e41d44ea92d6a5d37fd645
+  - enabled: 1
+    path: Assets/@ColorClash/Scenes/level_20.unity
+    guid: 6bdf5ecd60e54f1469fb272ab51f818a
+  - enabled: 1
+    path: Assets/@ColorClash/Scenes/level_21.unity
+    guid: 8ea0ba62ddf23494e8baa04e9071d8a5
+  - enabled: 1
+    path: Assets/@ColorClash/Scenes/level_22.unity
+    guid: a3b251cc6d4169f4aafe8ba706d84cdf
+  - enabled: 1
+    path: Assets/@ColorClash/Scenes/level_23.unity
+    guid: 385098bca7a339b488a9f667432f03b8
+  - enabled: 1
+    path: Assets/@ColorClash/Scenes/level_24.unity
+    guid: 00329cd0f87de9841b475fa1c349f6cd
+  - enabled: 1
+    path: Assets/@ColorClash/Scenes/level_25.unity
+    guid: 21b0bb62317ec9248a47f52e298794ed
+  - enabled: 1
+    path: Assets/@ColorClash/Scenes/level_26.unity
+    guid: 2648aa4f2a13dac40b0f5632123937fe
+  - enabled: 1
+    path: Assets/@ColorClash/Scenes/level_27.unity
+    guid: 6358df76e4b0688498f33be3a00dd15b
+  - enabled: 1
+    path: Assets/@ColorClash/Scenes/level_28.unity
+    guid: 47256321541833d409f916318c64748b
+  - enabled: 1
+    path: Assets/@ColorClash/Scenes/level_29.unity
+    guid: fa069f4f05bc72743bd700b98ef5c425
+  - enabled: 1
+    path: Assets/@ColorClash/Scenes/level_30.unity
+    guid: 71edd915b0d927943bfd4612e0dbb0cf
+  - enabled: 1
+    path: Assets/matsushima/Scenes/StageSelectScene.unity
+    guid: f2066eac8fea27649a81a582cec21b25
+  m_configObjects: {}

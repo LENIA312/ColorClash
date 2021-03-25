@@ -1,0 +1,326 @@
+﻿using System.Collections;
+using UnityEngine;
+using UnityEngine.UI;
+using kai;
+
+//------------------------------------------------------------------------------
+namespace backup
+{
+
+    /// <summary>
+    /// ゲーム全体を管理するスクリプト
+    /// </summary>
+    public class GameManager : MonoBehaviour
+    {
+        #region @enum列挙型
+        enum GAMESTATE : byte
+        {
+            タイトル,
+            プレイ中,
+            ステージクリア,
+            ゲームオーバー,
+            ショップ,
+            オプション
+        }
+        #endregion
+
+        #region @publicメンバ変数
+        public GameObject[] _UIs;
+        public Text _nowLevelText;
+        public Text _gotCoinText;
+        public GameObject _player;
+        public GameObject _cameraPlayer;
+        public GameObject _flashController;
+        public int _nowLevel;
+        #endregion
+
+        #region @privateメンバ変数
+        // コインの数
+        int mGotCoin;
+        // プレイヤーの初期位置
+        Vector3 mCameraPlayerInitialPosition;
+        Vector3 mPlayerInitialPosition;
+        // ステージ上に配置されている全ての障害物
+        GameObject[] mObstacle;
+        // ステージ上に配置されている全てのコイン
+        GameObject[] mCoin;
+        // ステージ上に設置されている全ての無敵ボックス
+        GameObject[] mStarBox;
+        // ゲームの状態を管理する列挙型
+        GAMESTATE mGameState;
+        #endregion
+
+        //----------------------------------------------------------------------
+        void Start()
+        {
+            mObstacle = GameObject.FindGameObjectsWithTag("Obstacle");
+            mCoin = GameObject.FindGameObjectsWithTag("Coin");
+            mStarBox = GameObject.FindGameObjectsWithTag("StarBox");
+
+            mCameraPlayerInitialPosition = _cameraPlayer.transform.position;
+            mPlayerInitialPosition = _player.transform.localPosition;
+
+            // UIを表示
+            foreach(GameObject uis in _UIs){
+                uis.SetActive(false);
+            }
+            _UIs[(byte)mGameState].SetActive(true);
+
+            // 現在のレベルをロード
+            
+
+            // コインの数をロード
+            mGotCoin = 0;
+            
+        }
+
+        //----------------------------------------------------------------------
+        void Update()
+        {
+            switch (mGameState) {
+                case GAMESTATE.タイトル:
+                    TitleScreen();
+                    break;
+                case GAMESTATE.プレイ中:
+                    PlayingTheStage();
+                    break;
+                case GAMESTATE.ステージクリア:
+                    StageClearScreen();
+                    break;
+                case GAMESTATE.ゲームオーバー:
+                    GameOverScreen();
+                    break;
+            }
+
+            // 現在のレベル
+            if (_nowLevel != 0) {
+                _nowLevelText.text = "LEVEL : " + _nowLevel;
+            } else {
+                _nowLevelText.text = "TUTORIAL";
+            }
+
+            // コイン表示
+            _gotCoinText.text = "COIN : " + mGotCoin;
+        }
+
+        //----------------------------------------------------------------------
+        /// <summary>
+        /// タイトル画面時の処理
+        /// </summary>
+        void TitleScreen()
+        {
+
+        }
+
+        //----------------------------------------------------------------------
+        /// <summary>
+        /// ステージプレイ中時の処理
+        /// </summary>
+        void PlayingTheStage()
+        {
+            // Playerオブジェクトが非アクティブになったらGameOverEvent()を実行
+            if (!_player.activeSelf && mGameState != GAMESTATE.ゲームオーバー) {
+                StartCoroutine("GameOverEvent");
+            }
+        }
+
+        //----------------------------------------------------------------------
+        /// <summary>
+        /// ステージクリア画面時の処理
+        /// </summary>
+        void StageClearScreen()
+        {
+
+        }
+
+        //----------------------------------------------------------------------
+        /// <summary>
+        /// ゲームオーバー画面時の処理
+        /// </summary>
+        void GameOverScreen()
+        {
+            
+        }
+
+        //----------------------------------------------------------------------
+        /// <summary>
+        /// ステージ開始時に呼び出される処理
+        /// </summary>
+        /// :
+        /// 各オブジェクトのInitialize()を実行します。
+        public void StageStartEvent()
+        {
+            SetGameState(GAMESTATE.プレイ中);
+
+            _cameraPlayer.GetComponent<CameraController>().Initialize();
+            foreach (GameObject obstacles in mObstacle) {
+                obstacles.GetComponent<Obstacle>().Initialize();
+            }
+            _player.GetComponent<PlayerController>().Initialize();
+        }
+
+        //----------------------------------------------------------------------
+        /// <summary>
+        /// ステージクリア時に呼び出される処理
+        /// </summary>
+        /// :
+        /// ステージクリア時の演出の処理はここに書きます。
+        IEnumerator StageClearEvent()
+        {
+            SetGameState(GAMESTATE.ステージクリア);
+            yield return null;
+        }
+
+        //----------------------------------------------------------------------
+        /// <summary>
+        /// ゲームオーバー時に呼び出される処理
+        /// </summary>
+        /// :
+        /// ゲームオーバー時の演出の処理はここに書きます。
+        IEnumerator GameOverEvent()
+        {
+            SetGameState(GAMESTATE.ゲームオーバー);
+
+            //_flashController.GetComponent<FlashController>().StartCoroutine("FlashScreen");
+            _cameraPlayer.GetComponent<CameraController>().StartCoroutine("GameOverEvent");
+
+            // 時を遅くして
+            Time.timeScale = 0.25f;
+
+            // 少し待って
+            float waitTime = 0;
+            while (waitTime < 0.1f) {
+                waitTime += Time.deltaTime;
+                yield return null;
+            }
+
+            // 段々戻る
+            while (Time.timeScale != 1) {
+                Time.timeScale = Mathf.MoveTowards(Time.timeScale, 1, Time.deltaTime * 2);
+                yield return null;
+            }
+            Time.timeScale = 1;
+        }
+
+        //----------------------------------------------------------------------
+        /// <summary>
+        /// タイトル画面に戻る処理
+        /// </summary>
+        public void ReturnToTitleScreen(bool aRetry)
+        {
+            SetGameState(GAMESTATE.タイトル);
+            StageResetEvent(aRetry);
+        }
+
+        //----------------------------------------------------------------------
+        /// <summary>
+        /// 次のステージへ進む処理
+        /// </summary>
+        public void NextLevel()
+        {
+            SetGameState(GAMESTATE.タイトル);
+            _nowLevel++;
+            StageResetEvent(false);
+        }
+
+        //----------------------------------------------------------------------
+        /// <summary>
+        /// ステージの状態をリセットする処理
+        /// </summary>
+        void StageResetEvent(bool aRetry)
+        {
+            Time.timeScale = 1;
+
+            // CameraPlayer初期化
+            Vector3 retryPosition = _cameraPlayer.transform.position;
+            if (!aRetry) {
+                retryPosition = mCameraPlayerInitialPosition;
+            } else {
+                GameObject goalLine = GameObject.Find("GoalLine");
+                if (_cameraPlayer.transform.position.z < goalLine.transform.position.z / 2) {
+                    retryPosition.z = goalLine.transform.position.z / 2;
+                }
+            }
+            _cameraPlayer.transform.position = retryPosition;
+            _cameraPlayer.GetComponent<CameraController>().Reset();
+
+            // Player初期化
+            _player.SetActive(true);
+            _player.transform.localPosition = mPlayerInitialPosition;
+            _player.GetComponent<PlayerController>().Reset();
+            Destroy(GameObject.Find("BallDebris(Clone)"));
+
+            // Obstacle初期化
+            foreach (GameObject obstacles in mObstacle) {
+                if (retryPosition.z + 5 < obstacles.transform.parent.position.z) {
+                    obstacles.SetActive(true);
+                } else {
+                    obstacles.SetActive(false);
+                }
+                if (!aRetry) {
+                    obstacles.SetActive(true);
+                }
+            }
+
+            // Coin初期化
+            foreach (GameObject coins in mCoin) {
+                if (retryPosition.z + 5 < coins.transform.position.z) {
+                    coins.SetActive(true);
+                    coins.GetComponent<Coin>().Reset();
+                } else if (aRetry) {
+                    coins.SetActive(false);
+                }
+                if (!aRetry) {
+                    coins.SetActive(true);
+                }
+            }
+
+            // ScatteredCoin初期化
+            foreach (GameObject scatteredCoins in GameObject.FindGameObjectsWithTag("ScatteredCoin")) {
+                Destroy(scatteredCoins);
+            }
+
+            // StarBox初期化
+            foreach (GameObject starBoxies in mStarBox) {
+                if (retryPosition.z + 5 < starBoxies.transform.position.z) {
+                    starBoxies.SetActive(true);
+                } else if (aRetry) {
+                    starBoxies.SetActive(false);
+                }
+                if (!aRetry) {
+                    starBoxies.SetActive(true);
+                }
+            }
+        }
+
+        //----------------------------------------------------------------------
+        /// <summary>
+        /// ゲームの状態を切り替える
+        /// </summary>
+        /// :
+        /// <param name="aGameState"> ゲームをどの状態に切り替えるかを指定する </param>
+        void SetGameState(GAMESTATE aGameState)
+        {
+            // 現在のUIを非表示
+            _UIs[(byte)mGameState].SetActive(false);
+
+            mGameState = aGameState;
+
+            // 新しい状態のUIを表示
+            _UIs[(byte)mGameState].SetActive(true);
+        }
+
+        //----------------------------------------------------------------------
+        /// <summary>
+        /// コイン取得時に呼び出される処理
+        /// </summary>
+        /// :
+        /// <param name="aCoin"> aCoin コインの取得枚数 </param>
+        public void GetCoint(int aCoin)
+        {
+            mGotCoin += aCoin;
+        }
+    }
+
+} // namespace
+// EOF

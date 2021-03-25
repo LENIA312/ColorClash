@@ -1,0 +1,321 @@
+﻿using System.Collections;
+using UnityEngine;
+using kai;
+
+//------------------------------------------------------------------------------
+namespace ugai
+{
+
+    /// <summary>
+    /// プレイヤーの操作
+    /// </summary>
+    public class BallController : MonoBehaviour
+    {
+        GameManager mGameManager;
+
+        #region #public変数
+        //{
+        // 移動の感度
+        public float _MoveSpeed = 1;
+        // 色変え時に生成するパーティクル
+        public GameObject _Particle;
+        // 無敵時に生成するパーティクル
+        public GameObject _mutekiParticle;
+        // ミス時に生成する破片
+        public GameObject _playerDebris;
+        //}
+        #endregion
+
+        #region #privateメンバ変数
+        //{
+        // 現在の色
+        int mColorNum;
+        // タップ数
+        int mTapCount;
+        // タップし続けている時の経過時間
+        float tappingTimer;
+        // 無敵時間
+        float _mutekiWait;
+        // ステージプレイ中にtrueを返す
+        bool mIsPlayingStage;
+        // 無敵中にtrueを返す
+        bool mIsMuteki;
+
+        // タップした瞬間の指の位置
+        Vector2 mStartPos;
+        // 現在タップしている指の位置
+        Vector2 mNowPos;
+        // タップを離した位置
+        Vector3 mLastPos;
+        // startPosとnowPosの距離
+        Vector3 mDragDistance;
+
+        // 色
+        Color[] mColors;
+        // マテリアル
+        Material[] mMaterials;
+
+        // カメラ
+        CameraController mCameraControllerCs;
+
+        // コンポーネント
+        Renderer mRenderer;
+        Light mLight;
+        //}
+        #endregion
+
+        //----------------------------------------------------------------------
+        void Start()
+        {
+            mGameManager = GameManager.instance;
+
+            mColorNum = 0;
+
+            mLastPos = transform.localPosition;
+
+            mColors = mGameManager.GetColors();
+            //mMaterials[0] = Resources.Load("Materials/Player") as Material;
+            //mMaterials[1] = Resources.Load("Materials/Muteki") as Material;
+
+            mCameraControllerCs = GameObject.Find("CameraController").GetComponent<CameraController>();
+
+            mRenderer = GetComponent<Renderer>();
+            mLight = GetComponent<Light>();
+
+            //mRenderer.material = mMaterials[0];
+            mRenderer.material.color = mColors[mColorNum];
+        }
+
+        //----------------------------------------------------------------------
+        void Update()
+        {
+            if (mIsPlayingStage)
+            {
+                MoveDrag();
+                ChangeColorTap();
+            }
+        }
+
+        //----------------------------------------------------------------------
+        /// <summary>
+        /// ドラッグで移動
+        /// </summary>
+        void MoveDrag()
+        {
+            bool flg = false;
+
+            if (Input.touchCount > 1)
+            {
+                flg = true;
+            }
+
+            // タップした瞬間
+            if (Input.GetMouseButtonDown(0))
+            {
+                if (Input.touchCount == 1)
+                {
+                    mStartPos = Input.mousePosition;
+                }
+            }
+            // タップ中
+            else if (Input.GetMouseButton(0))
+            {
+                if (Input.touchCount == 1)
+                {
+                    if (flg == true)
+                    {
+                        mStartPos = Input.mousePosition;
+                        flg = false;
+                    }
+
+                    mNowPos = Input.mousePosition;
+                    mDragDistance.x = mStartPos.x - mNowPos.x;
+                    mDragDistance.z = mStartPos.y - mNowPos.y;
+                }
+            }
+            // タップを離した瞬間
+            else if (Input.GetMouseButtonUp(0))
+            {
+                mLastPos = transform.localPosition;
+                mDragDistance.x = 0;
+                mDragDistance.z = 0;
+            }
+
+            // ドラッグした距離だけ移動
+            transform.localPosition = mLastPos - (mDragDistance * 0.025f) * _MoveSpeed;
+
+            // 移動制限
+            Vector3 playerPos = transform.localPosition;
+            playerPos.x = Mathf.Clamp(playerPos.x, -5.25f, 5.25f);
+            playerPos.y = 0;
+            playerPos.z = Mathf.Clamp(playerPos.z, -10, 14);
+            transform.localPosition = playerPos;
+        }
+
+        //----------------------------------------------------------------------
+        /// <summary>
+        /// タップで色を変える
+        /// </summary>
+        void ChangeColorTap()
+        {
+            // タップ中
+            if (Input.GetMouseButton(0))
+            {
+                tappingTimer += Time.deltaTime;
+            }
+            // 指を離した瞬間
+            else if (Input.GetMouseButtonUp(0))
+            {
+                mTapCount++;
+                if (tappingTimer <= 0.15 && mDragDistance.magnitude <= 10 && mTapCount > 1 && !mIsMuteki)
+                {
+                    StartCoroutine("ChangeColor");
+                }
+                tappingTimer = 0;
+            }
+        }
+
+        //----------------------------------------------------------------------
+        /// <summary>
+        /// ステージ開始時に呼び出される処理
+        /// </summary>
+        public void Initialize()
+        {
+            mIsPlayingStage = true;
+
+            mTapCount = 0;
+            transform.GetChild(0).GetComponent<TrailRenderer>().time = 0.75f;
+        }
+
+        //----------------------------------------------------------------------
+        /// <summary>
+        /// リセット
+        /// </summary>
+        public void Reset()
+        {
+            mIsPlayingStage = false;
+            mTapCount = 0;
+            mColorNum = 0;
+            mRenderer.material.color = mColors[mColorNum];
+            transform.GetChild(0).GetComponent<TrailRenderer>().time = 0;
+        }
+
+        //----------------------------------------------------------------------
+        /// <summary>
+        /// ゲームオーバーになった瞬間に呼び出される処理
+        /// </summary>
+        void GameOverEvent()
+        {
+            mIsPlayingStage = false;
+
+            // 破片を生成
+            Transform debrisChildren =
+                Instantiate(_playerDebris, this.transform.position, Quaternion.identity).transform;
+            foreach (Transform debries in debrisChildren)
+            {
+                debries.GetComponent<MeshRenderer>().material.color = mColors[mColorNum];
+            }
+
+            // 座標のリセット
+            mLastPos = new Vector3(0, 0, -7);
+            mDragDistance = new Vector3(0, 0, 0);
+
+            // 軌跡を消す
+            transform.GetChild(0).GetComponent<TrailRenderer>().time = 0;
+
+            // GameManagerのGameOverイベントを実行
+            GameManager.instance.GameOverEvent();
+
+            // 非アクティブに
+            this.gameObject.SetActive(false);
+        }
+
+        //----------------------------------------------------------------------
+        /// <summary>
+        /// 他のコライダーに触れた時に呼び出される処理
+        /// </summary>
+        void OnCollisionEnter(Collision collision)
+        {
+            if (collision.gameObject.tag == "Obstacle")
+            {
+                Obstacle obstacle = collision.gameObject.GetComponent<Obstacle>();
+                if (obstacle.GetColorNum() == mColorNum || mIsMuteki)
+                {
+                    // 障害物を破壊
+                    obstacle.StartCoroutine("DestroyEvent");
+                }
+                else
+                {
+                    GameOverEvent();
+                }
+            }
+            if (collision.gameObject.tag == "StarBox")
+            {
+                collision.gameObject.SetActive(false);
+                StartCoroutine("Muteki");
+            }
+        }
+
+        //----------------------------------------------------------------------
+        /// <summary>
+        /// 色を変える瞬間に呼び出される処理
+        /// </summary>
+        IEnumerator ChangeColor()
+        {
+            // 色の変更
+            mColorNum = (mColorNum < 2) ? mColorNum + 1 : 0;
+            mRenderer.material.color = mColors[mColorNum];
+
+            // パーティクル
+            ParticleSystem.MainModule main =
+                Instantiate(_Particle, this.transform.position, Quaternion.identity).
+                GetComponent<ParticleSystem>().main;
+            // main.startColor = mColors[mColorNum];
+
+            // 一瞬だけ膨らませる
+            Vector3 tmpScale = this.transform.localScale;
+            float hukuramu = 0.5f;
+            while (hukuramu > 0)
+            {
+                this.transform.localScale =
+                    new Vector3(
+                        tmpScale.x + hukuramu,
+                        tmpScale.y + hukuramu,
+                        tmpScale.z + hukuramu
+                        );
+                hukuramu = Mathf.MoveTowards(hukuramu, 0, Time.deltaTime * 10);
+                yield return null;
+            }
+            // 戻す
+            this.transform.localScale = tmpScale;
+        }
+
+        //----------------------------------------------------------------------
+        /// <summary>
+        /// 無敵になる瞬間に呼び出される処理
+        /// </summary>
+        IEnumerator Muteki()
+        {
+            mIsMuteki = true;
+            mLight.enabled = true;
+            //mMeshRenderer.material = mMaterials[3];
+            mCameraControllerCs.StartCoroutine("OnMuteki");
+            Instantiate(_mutekiParticle, this.transform.position, Quaternion.identity);
+
+            _mutekiWait += 5;
+            while (_mutekiWait > 0)
+            {
+                _mutekiWait -= Time.deltaTime;
+                yield return null;
+            }
+
+            mIsMuteki = false;
+            mLight.enabled = false;
+            //mMeshRenderer.material = mMaterials[mColorNum];
+            mCameraControllerCs.StartCoroutine("OffMuteki");
+            Instantiate(_mutekiParticle, this.transform.position, Quaternion.identity);
+        }
+    }
+
+} // namespace
+  //EOF
